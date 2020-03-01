@@ -1,9 +1,11 @@
 [tool.poetry]
 name = "cambak"
-version = "0.1.0"
-description = "Camera Backup script"
+version = "0.1.1"
+description = "Simple tool for automating the derushing process of your cameras"
 authors = ["Michael Vieira <github@mvieira.fr>"]
 license = "MIT"
+repository = "https://github.com/Themimitoof/cambak.git"
+readme = "README.md"
 
 [tool.poetry.dependencies]
 python = ">=3.6"
