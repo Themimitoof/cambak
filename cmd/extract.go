@@ -36,6 +36,25 @@ For more information, please consult: https://github.com/themimitoof/cambak.`,
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		conf := superchargeConf(cmd, args)
+
+		// Collect all files
+		files := cb_files.CollectFiles(conf)
+		allFiles := files.Pictures
+		allFiles = append(allFiles, files.RAW...)
+		allFiles = append(allFiles, files.Movies...)
+
+		totalFiles := len(allFiles)
+		remainingFiles := totalFiles
+
+		for _, fl := range allFiles {
+			remainingFiles--
+			fmt.Printf("Extract '%s' file. (Remaining %d/%d)\n", fl.Path, remainingFiles, totalFiles)
+
+			if !conf.Extract.DryRunMode {
+				destPath, _ := fl.PrepareFileDestinationFolder(conf)
+				fl.ExtractFile(conf, destPath)
+			}
+		}
 	},
 }
 
