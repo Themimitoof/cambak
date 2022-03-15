@@ -24,6 +24,34 @@ During the first execution, a default configuration file will be created. You
 can override it by an another configuration file by using the --config flag.
 
 For more information, please consult: https://github.com/themimitoof/cambak.`,
+	PersistentPreRun: func(cmd *cobra.Command, args []string) {
+		userConfPath, _ := cmd.Flags().GetString("config")
+
+		// If no custom configuration file have been specified and if this one doesn't
+		// exists, create it.
+		if userConfPath == defaultConfPath {
+			_, err := os.Stat(userConfPath)
+
+			if err != nil {
+				fmt.Println("Generating the default configuration file...")
+				err = config.NewConfigurationFile(userConfPath)
+
+				if err != nil {
+					fmt.Printf("Unable to generate the default configuration file. Err: %s\n", err)
+					os.Exit(255)
+				}
+			}
+		}
+
+		// Load the configuration
+		var err error
+		conf, err = config.OpenConfigurationFile(userConfPath)
+
+		if err != nil {
+			fmt.Printf("Unable to open or read the configuration file. Err: %s\n", err)
+			os.Exit(2)
+		}
+	},
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.

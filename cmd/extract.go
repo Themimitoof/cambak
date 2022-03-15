@@ -35,7 +35,7 @@ For more information, please consult: https://github.com/themimitoof/cambak.`,
 		return nil
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("plop")
+		conf := superchargeConf(cmd, args)
 	},
 }
 
@@ -62,4 +62,80 @@ func init() {
 	extractCmd.Flags().BoolP("clean", "c", false, "Delete source file after been copied")
 	// extractCmd.Flags().BoolP("auto-source", "a", false, "Auto guess the source file (not yet implemented)")
 	// extractCmd.Flags().BoolP("format-source", "z", false, "Format the source after the extraction done (not yet implemented)")
+}
+
+func superchargeConf(cmd *cobra.Command, args []string) cb_config.Configuration {
+	// Manage source path
+	if len(args) == 0 {
+		fmt.Println("Please specify the source folder where are located your files.")
+		os.Exit(1)
+	} else {
+		conf.Extract.SourcePath = args[0]
+	}
+
+	// Manage destination path
+	if len(args) < 2 && conf.Extract.DestinationPath == "" {
+		fmt.Println("Please specify the destination folder.")
+		os.Exit(1)
+	} else {
+		conf.Extract.DestinationPath = args[1]
+	}
+
+	// Manage extraction media types
+	allMediasFlag, _ := cmd.Flags().GetBool("all")
+	picturesFlag, _ := cmd.Flags().GetBool("pictures")
+	rawsFlag, _ := cmd.Flags().GetBool("raws")
+	moviesFlag, _ := cmd.Flags().GetBool("movies")
+
+	if allMediasFlag {
+		conf.Extract.ExtractPictures = true
+		conf.Extract.ExtractRaws = true
+		conf.Extract.ExtractMovies = true
+	} else if picturesFlag || rawsFlag || moviesFlag {
+		conf.Extract.ExtractPictures = picturesFlag
+		conf.Extract.ExtractRaws = rawsFlag
+		conf.Extract.ExtractMovies = moviesFlag
+	}
+
+	// Extraction filters
+	// ...
+
+	// Conflict management
+	skipFlag, _ := cmd.Flags().GetBool("skip")
+	mergeFlag, _ := cmd.Flags().GetBool("merge")
+
+	if skipFlag && mergeFlag {
+		fmt.Println("You can't use --skip and --merge at the same time.")
+		os.Exit(1)
+	}
+
+	if skipFlag {
+		conf.Extract.DestinationConflict = cb_config.DEST_CONFLICT_SKIP
+	} else if mergeFlag {
+		conf.Extract.DestinationConflict = cb_config.DEST_CONFLICT_MERGE
+	}
+
+	// Extraction destination and camera name
+	extractFormat, _ := cmd.Flags().GetString("format")
+	cameraName, _ := cmd.Flags().GetString("name")
+
+	if extractFormat != "" {
+		conf.Extract.DestinationFormat = extractFormat
+	}
+
+	if cameraName != "" {
+		conf.Extract.CameraName = cameraName
+	}
+
+	// Misc flags
+	dryRunFlag, _ := cmd.Flags().GetBool("dry-run")
+	cleanFlag, _ := cmd.Flags().GetBool("clean")
+
+	conf.Extract.DryRunMode = dryRunFlag
+
+	if cleanFlag {
+		conf.Extract.CleanAfterCopy = true
+	}
+
+	return conf
 }
