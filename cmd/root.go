@@ -1,10 +1,10 @@
 package cmd
 
 import (
-	"fmt"
 	"os"
 	"strings"
 
+	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 	"github.com/themimitoof/cambak/config"
 )
@@ -33,11 +33,11 @@ For more information, please consult: https://github.com/themimitoof/cambak.`,
 			_, err := os.Stat(userConfPath)
 
 			if err != nil {
-				fmt.Println("Generating the default configuration file...")
+				color.Yellow("Generating the default configuration file...")
 				err = config.NewConfigurationFile(userConfPath)
 
 				if err != nil {
-					fmt.Printf("Unable to generate the default configuration file. Err: %s\n", err)
+					color.Red("Unable to generate the default configuration file. Err: %s\n", err)
 					os.Exit(255)
 				}
 			}
@@ -48,7 +48,7 @@ For more information, please consult: https://github.com/themimitoof/cambak.`,
 		conf, err = config.OpenConfigurationFile(userConfPath)
 
 		if err != nil {
-			fmt.Printf("Unable to open or read the configuration file. Err: %s\n", err)
+			color.Red("Unable to open or read the configuration file. Err: %s\n", err)
 			os.Exit(2)
 		}
 	},

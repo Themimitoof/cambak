@@ -1,9 +1,12 @@
 package cmd
 
 import (
-	"fmt"
 	"os"
+	"time"
 
+	"github.com/briandowns/spinner"
+	"github.com/fatih/color"
+	"github.com/schollz/progressbar/v3"
 	"github.com/spf13/cobra"
 	cb_config "github.com/themimitoof/cambak/config"
 	cb_files "github.com/themimitoof/cambak/files"
@@ -38,6 +41,10 @@ For more information, please consult: https://github.com/themimitoof/cambak.`,
 		conf := superchargeConf(cmd, args)
 
 		// Collect all files
+		s := spinner.New(spinner.CharSets[14], 100*time.Millisecond)
+		s.Suffix = "Collecting all files..."
+		s.Start()
+
 		files := cb_files.CollectFiles(conf)
 		allFiles := files.Pictures
 		allFiles = append(allFiles, files.RAW...)
@@ -46,14 +53,25 @@ For more information, please consult: https://github.com/themimitoof/cambak.`,
 		totalFiles := len(allFiles)
 		remainingFiles := totalFiles
 
+		if conf.Extract.DestinationConflict == cb_config.DEST_CONFLICT_SKIP {
+			s.FinalMSG = color.GreenString("✅ %d files collected, %d skipped.\n", totalFiles, 0)
+		} else {
+			s.FinalMSG = color.GreenString("✅ %d files collected.\n", totalFiles)
+		}
+
+		s.Stop()
+
+		// Copying files
+		color.Yellow("Copying files...")
+		bar := progressbar.Default(int64(totalFiles))
 		for _, fl := range allFiles {
 			remainingFiles--
-			fmt.Printf("Extract '%s' file. (Remaining %d/%d)\n", fl.Path, remainingFiles, totalFiles)
 
 			if !conf.Extract.DryRunMode {
 				destPath, _ := fl.PrepareFileDestinationFolder(conf)
 				fl.ExtractFile(conf, destPath)
 			}
+			bar.Add(1)
 		}
 	},
 }
@@ -86,7 +104,7 @@ func init() {
 func superchargeConf(cmd *cobra.Command, args []string) cb_config.Configuration {
 	// Manage source path
 	if len(args) == 0 {
-		fmt.Println("Please specify the source folder where are located your files.")
+		color.Red("Please specify the source folder where are located your files.")
 		os.Exit(1)
 	} else {
 		conf.Extract.SourcePath = args[0]
@@ -94,7 +112,7 @@ func superchargeConf(cmd *cobra.Command, args []string) cb_config.Configuration 
 
 	// Manage destination path
 	if len(args) < 2 && conf.Extract.DestinationPath == "" {
-		fmt.Println("Please specify the destination folder.")
+		color.Red("Please specify the destination folder.")
 		os.Exit(1)
 	} else {
 		conf.Extract.DestinationPath = args[1]
@@ -124,7 +142,7 @@ func superchargeConf(cmd *cobra.Command, args []string) cb_config.Configuration 
 	mergeFlag, _ := cmd.Flags().GetBool("merge")
 
 	if skipFlag && mergeFlag {
-		fmt.Println("You can't use --skip and --merge at the same time.")
+		color.Red("You can't use --skip and --merge at the same time.")
 		os.Exit(1)
 	}
 

@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"os"
 
+	"github.com/fatih/color"
 	"github.com/themimitoof/cambak/config"
 )
 
@@ -34,19 +35,19 @@ func (file File) ExtractFile(conf config.Configuration, dest string) error {
 	if conf.Extract.CleanAfterCopy {
 		// Move the file
 		if err := os.Rename(file.Path, fileDest); err != nil {
-			fmt.Printf(errMsg, file.Path, err)
+			color.Red(errMsg, file.Path, err)
 			return err
 		}
 	} else {
 		// Copy the file instead of moving it
 		fl, err := ioutil.ReadFile(file.Path)
 		if err != nil {
-			fmt.Printf(errMsg, file.Path, err)
+			color.Red(errMsg, file.Path, err)
 			return err
 		}
 
 		if err = ioutil.WriteFile(fileDest, fl, 0755); err != nil {
-			fmt.Printf(errMsg, file.Path, err)
+			color.Red(errMsg, file.Path, err)
 			return err
 		}
 	}
@@ -58,7 +59,7 @@ func (file File) PrepareFileDestinationFolder(conf config.Configuration) (string
 	destinationPath := file.GenerateDestinationPath(conf)
 
 	if err := os.MkdirAll(destinationPath, 0755); err != nil {
-		fmt.Printf(
+		color.Red(
 			"Unable to create the destination folder '%s' for file '%s'. Err: %s\n",
 			destinationPath,
 			file.File.Name(),

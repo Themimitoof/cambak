@@ -6,6 +6,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/fatih/color"
 	"github.com/themimitoof/cambak/config"
 )
 
@@ -37,7 +38,7 @@ func ListFiles(sourcePath string, extensions []string, category FileCategory) []
 		}
 
 		if err != nil {
-			fmt.Printf("Unable to manage %s (err: %s)", path, err)
+			color.Red("Unable to manage %s (err: %s)", path, err)
 			return nil
 		}
 
