@@ -20,9 +20,17 @@ func CollectFiles(conf config.Configuration) Files {
 	files := Files{}
 	source := conf.Extract.SourcePath
 
-	files.Pictures = append(files.Pictures, ListFiles(source, picturesExtensions, FC_PICTURE)...)
-	files.RAW = append(files.Pictures, ListFiles(source, rawExtensions, FC_RAW)...)
-	files.Movies = append(files.Pictures, ListFiles(source, moviesExtensions, FC_MOVIE)...)
+	if conf.Extract.ExtractPictures {
+		files.Pictures = append(files.Pictures, ListFiles(source, picturesExtensions, FC_PICTURE)...)
+	}
+
+	if conf.Extract.ExtractRaws {
+		files.RAW = append(files.RAW, ListFiles(source, rawExtensions, FC_RAW)...)
+	}
+
+	if conf.Extract.ExtractMovies {
+		files.Movies = append(files.Movies, ListFiles(source, moviesExtensions, FC_MOVIE)...)
+	}
 
 	return files
 }
@@ -44,14 +52,17 @@ func ListFiles(sourcePath string, extensions []string, category FileCategory) []
 
 		path = fmt.Sprintf("%s/%s", sourcePath, path)
 
-		if d.IsDir() {
-			files = append(files, ListFiles(path, extensions, category)...)
-		} else if d.Type().IsRegular() {
+		if d.Type().IsRegular() {
 			fileInfo, _ := d.Info()
 			splittedFileName := strings.SplitAfter(fileInfo.Name(), ".")
 			ext := strings.ToLower(
 				splittedFileName[len(splittedFileName)-1],
 			)
+
+			// Ignore all "hidden" files
+			if fileInfo.Name()[0] == '.' {
+				return nil
+			}
 
 			for _, fileExt := range extensions {
 				if ext == fileExt {

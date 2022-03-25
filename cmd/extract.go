@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"fmt"
 	"os"
 	"time"
 
@@ -53,10 +54,17 @@ For more information, please consult: https://github.com/themimitoof/cambak.`,
 		totalFiles := len(allFiles)
 		remainingFiles := totalFiles
 
+		finalMsg := fmt.Sprintf(
+			"✅ %d files collected (%d pictures, %d RAWs, %d movies)",
+			totalFiles,
+			len(files.Pictures),
+			len(files.RAW),
+			len(files.Movies),
+		)
 		if conf.Extract.DestinationConflict == cb_config.DEST_CONFLICT_SKIP {
-			s.FinalMSG = color.GreenString("✅ %d files collected, %d skipped.\n", totalFiles, 0)
+			s.FinalMSG = color.GreenString("%s. %d files skipped.\n", finalMsg, 0)
 		} else {
-			s.FinalMSG = color.GreenString("✅ %d files collected.\n", totalFiles)
+			s.FinalMSG = color.GreenString(finalMsg + "\n")
 		}
 
 		s.Stop()
@@ -111,11 +119,11 @@ func superchargeConf(cmd *cobra.Command, args []string) cb_config.Configuration 
 	}
 
 	// Manage destination path
-	if len(args) < 2 && conf.Extract.DestinationPath == "" {
+	if len(args) >= 2 {
+		conf.Extract.DestinationPath = args[1]
+	} else if len(args) < 2 && conf.Extract.DestinationPath == "" {
 		color.Red("Please specify the destination folder.")
 		os.Exit(1)
-	} else {
-		conf.Extract.DestinationPath = args[1]
 	}
 
 	// Manage extraction media types
