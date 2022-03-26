@@ -28,10 +28,6 @@ func (file File) ExtractFile(conf config.Configuration, dest string) error {
 	errMsg := "Unable to copy file '%s' to his destination folder. Err: %s\n"
 	fileDest := fmt.Sprintf("%s/%s", dest, file.File.Name())
 
-	if _, err := os.Stat(fileDest); err != nil && conf.Extract.DestinationConflict == "skip" {
-		return nil
-	}
-
 	if conf.Extract.CleanAfterCopy {
 		// Move the file
 		if err := os.Rename(file.Path, fileDest); err != nil {

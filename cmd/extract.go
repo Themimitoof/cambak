@@ -51,36 +51,39 @@ For more information, please consult: https://github.com/themimitoof/cambak.`,
 		allFiles = append(allFiles, files.RAW...)
 		allFiles = append(allFiles, files.Movies...)
 
-		totalFiles := len(allFiles)
-		remainingFiles := totalFiles
-
 		finalMsg := fmt.Sprintf(
 			"✅ %d files collected (%d pictures, %d RAWs, %d movies)",
-			totalFiles,
+			files.TotalFiles,
 			len(files.Pictures),
 			len(files.RAW),
 			len(files.Movies),
 		)
 		if conf.Extract.DestinationConflict == cb_config.DEST_CONFLICT_SKIP {
-			s.FinalMSG = color.GreenString("%s. %d files skipped.\n", finalMsg, 0)
+			s.FinalMSG = color.GreenString("%s. %d files skipped.\n", finalMsg, files.SkippedFiles)
 		} else {
 			s.FinalMSG = color.GreenString(finalMsg + "\n")
 		}
 
 		s.Stop()
 
+		// Exit the program if there is no files to copy
+		if files.TotalFiles == 0 {
+			color.Green("😴 There is no files to copy, please let me sleep.")
+			os.Exit(0)
+		}
+
 		// Copying files
 		color.Yellow("Copying files...")
-		bar := progressbar.Default(int64(totalFiles))
+		bar := progressbar.Default(int64(files.TotalFiles))
 		for _, fl := range allFiles {
-			remainingFiles--
-
 			if !conf.Extract.DryRunMode {
 				destPath, _ := fl.PrepareFileDestinationFolder(conf)
 				fl.ExtractFile(conf, destPath)
 			}
 			bar.Add(1)
 		}
+
+		color.Green("✨ All files have been copied!")
 	},
 }
 
