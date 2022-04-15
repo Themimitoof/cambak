@@ -7,13 +7,14 @@ import (
 	"github.com/spf13/cobra"
 )
 
-const CAMBAK_VERSION string = "0.1.1"
+var CambakVersion string
+var CambakCommit string
 
 var versionCmd = &cobra.Command{
 	Use:   "version",
 	Short: "Return the version of Cambak",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Printf("%s version %s\n", color.GreenString("Cambak"), color.GreenString("%s", CAMBAK_VERSION))
+		fmt.Printf("%s version %s (commit: %s)\n", color.GreenString("Cambak"), color.GreenString("%s", CambakVersion), CambakCommit)
 	},
 }
 
