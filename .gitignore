@@ -1,4 +1,5 @@
 # Ingore build files
 build/
+dist/
 cambak*
 !cambak.go

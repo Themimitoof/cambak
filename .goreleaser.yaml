@@ -1,15 +1,15 @@
-# This is an example .goreleaser.yml file with some sensible defaults.
-# Make sure to check the documentation at https://goreleaser.com
-project_name: Cambak
+project_name: cambak
 
 before:
   hooks:
     - go mod tidy
-    #- go generate ./...
 
 builds:
-  - env:
+  - id: cambak-binaries
+    env:
       - CGO_ENABLED=0
+    ldflags:
+      - -s -w -X 'github.com/themimitoof/cambak/cmd.CambakVersion={{.Version}}' -X 'github.com/themimitoof/cambak/cmd.CambakCommit={{.Commit}}'
     goos:
       - linux
       # - windows # XXX: Not tested for Windows... yet.
@@ -17,21 +17,23 @@ builds:
       - freebsd
       - openbsd
     goarch:
-      - 386
       - amd64
       - arm
       - arm64
+    goarm:
+      - 7
 
 archives:
   - replacements:
       darwin: MacOS
       linux: Linux
       windows: Windows
-      386: i386
       amd64: x86_64
+      arm: armhf
 
 nfpms:
-  - package_name: cambak
+  - id: cambak-pkgs
+    package_name: cambak
     vendor: Themimitoof
     homepage: https://github.com/themimitoof/cambak
     maintainer: Michael V. <dev@mvieira.fr>
@@ -40,6 +42,14 @@ nfpms:
       - apk
       - deb
       - rpm
+    builds:
+      - cambak-binaries
+    replacements:
+      darwin: MacOS
+      linux: Linux
+      windows: Windows
+      amd64: x86_64
+      arm: armhf
 
 checksum:
   name_template: 'checksums.txt'
@@ -53,3 +63,8 @@ changelog:
     exclude:
       - '^docs:'
       - '^test:'
+
+release:
+  draft: true
+  footer: |
+    That's all for this new release of Cambak {{ .Tag }}!
