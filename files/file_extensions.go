@@ -68,4 +68,5 @@ var rawExtensions = []string{
 
 var moviesExtensions = []string{
 	"mp4",
+	"mov",
 }
