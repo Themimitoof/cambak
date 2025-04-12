@@ -55,6 +55,15 @@ func ListFiles(conf config.Configuration, sourcePath string, extensions []string
 			return nil
 		}
 
+		// Split the path using "/" and get the last element
+		parent := strings.Split(path, "/")
+		element := parent[len(parent)-1]
+
+		// Skip files with ".Trash" prefix or named ".DS_Store"
+		if strings.HasPrefix(element, ".Trash") || element == ".DS_Store" {
+			return nil
+		}
+
 		if err != nil {
 			color.Red("Unable to manage %s (err: %s)", path, err)
 			return nil
